@@ -1,3 +1,5 @@
+import numpy as np
+
 # from xautodl.models.cell_operations import NAS_BENCH_201
 NAS_BENCH_201 = [
     "none", "skip_connect", "nor_conv_1x1", "nor_conv_3x3", "avg_pool_3x3"
@@ -9,6 +11,7 @@ NODE_TYPE_DICT = {
     "nor_conv_3x3": 3,
     "avg_pool_3x3": 4
 }
+N_NODES = 4
 
 
 def split_arch_str(arch_str: str, key: str) -> list:
@@ -17,16 +20,31 @@ def split_arch_str(arch_str: str, key: str) -> list:
     return splited_list
 
 
-# def build_matrix(arch_str: str):
-#     node_list = split_arch_str(arch_str, '+')
-#     for node in node_list:
+def build_matrix(arch_str: str):
+    matrix = np.zeros(shape=(N_NODES, N_NODES), dtype=np.int32)
 
+    # split origin str to 3 end nodes which are splited by '+'
+    nodes_list = split_arch_str(arch_str, '+')
+    assert len(nodes_list) == N_NODES - 1, 'Wrong length of nodes'
 
-#     return
+    for end_node, nodes in enumerate(nodes_list, start=1):
+        nodes = nodes.strip('|')
+        opts_list = split_arch_str(nodes, '|')
+        for opts in opts_list:
+            # ['avg_pool_3x3', '0'] [算子类型，前序节点号]
+            edge_list = split_arch_str(opts, '~')
+            edge_type = NODE_TYPE_DICT[edge_list[0]]
+            start_node = int(edge_list[1])
+            matrix[start_node][end_node] = edge_type
+
+    return matrix
 
 
 if __name__ == '__main__':
     arch_str = '|avg_pool_3x3~0|+|nor_conv_1x1~0|skip_connect~1|+|nor_conv_1x1~0|skip_connect~1|skip_connect~2|'
-    arch_str2 = '|nor_conv_3x3~0|'
-    l = split_arch_str(arch_str2, '|')
-    print(l)
+    arch_str2 = '|none~0|+|none~0|none~1|+|none~0|nor_conv_3x3~1|avg_pool_3x3~2|'
+    arch_str3 = '|none~0|+|skip_connect~0|avg_pool_3x3~1|+|skip_connect~0|nor_conv_3x3~1|nor_conv_3x3~2|'
+    arch_str4 = '|nor_conv_3x3~0|+|nor_conv_3x3~0|avg_pool_3x3~1|+|skip_connect~0|nor_conv_3x3~1|skip_connect~2|'
+    matrix = build_matrix(arch_str4)
+    print(matrix)
+    print(arch_str3)
