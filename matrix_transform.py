@@ -37,7 +37,7 @@ def build_matrix(arch_str: str):
             start_node = int(edge_list[1])
             matrix[start_node][end_node] = edge_type
 
-    return matrix
+    return matrix.tolist()
 
 
 if __name__ == '__main__':

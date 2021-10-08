@@ -7,6 +7,8 @@ from nas_201_api import NASBench201API as API
 from xautodl.models import get_cell_based_tiny_net
 from fvcore.nn import FlopCountAnalysis, parameter_count
 
+from matrix_transform import build_matrix
+
 
 NODE_TYPE_DICT = {
     "none": 0,
@@ -22,6 +24,9 @@ def main(api):
     
     for index, arch_str in enumerate(api):
         arch_dict = {}
+
+        matrix = build_matrix(arch_str)
+        arch_dict['cell_adjacency'] = matrix
         
         cifar10_valid_dict = api.get_more_info(index, 'cifar10-valid', 199, hp='200', is_random=False)
         cifar10_dict = api.get_more_info(index, 'cifar10', 199, hp='200', is_random=False)  
@@ -33,12 +38,12 @@ def main(api):
         arch_dict['cifar10_test_acc'] = cifar10_test_acc
 
         cifar100_dict = api.get_more_info(index, 'cifar100', 199, hp='200', is_random=False)
-        cifar100_dict_val_acc = cifar100_dict['valid-accuracy']
-        cifar100_dict_test_acc = cifar100_dict['test-accuracy']
+        cifar100_val_acc = cifar100_dict['valid-accuracy']
+        cifar100_test_acc = cifar100_dict['test-accuracy']
         # print(cifar100_dict_val_acc)
         # print(cifar100_dict_test_acc)
-        arch_dict['cifar100_dict_val_acc'] = cifar100_dict_val_acc
-        arch_dict['cifar100_dict_test_acc'] = cifar100_dict_test_acc
+        arch_dict['cifar100_val_acc'] = cifar100_val_acc
+        arch_dict['cifar100_test_acc'] = cifar100_test_acc
         
         imagenat16_dict = api.get_more_info(index, 'ImageNet16-120', 199, hp='200', is_random=False)
         imagenat16_val_acc = imagenat16_dict['valid-accuracy']
@@ -55,8 +60,8 @@ def main(api):
         cifar10_params = cifar10_cost_metrics['params']
         cifar10_latency = cifar10_cost_metrics['latency']
         # print(cifar10_flops, cifar10_params, cifar10_latency)
-        arch_dict['cifar10_flops'] = cifar10_flops
-        arch_dict['cifar10_params'] = cifar10_params
+        # arch_dict['cifar10_flops'] = cifar10_flops
+        # arch_dict['cifar10_params'] = cifar10_params
         arch_dict['cifar10_latency'] = cifar10_latency
 
         cifar100_cost_metrics = info.get_compute_costs('cifar100')
@@ -64,8 +69,8 @@ def main(api):
         cifar100_params = cifar100_cost_metrics['params']
         cifar100_latency = cifar100_cost_metrics['latency']
         # print(cifar100_flops, cifar100_params, cifar100_latency)
-        arch_dict['cifar100_flops'] = cifar100_flops
-        arch_dict['cifar100_params'] = cifar100_params
+        # arch_dict['cifar100_flops'] = cifar100_flops
+        # arch_dict['cifar100_params'] = cifar100_params
         arch_dict['cifar100_latency'] = cifar100_latency
 
         image16_cost_metrics = info.get_compute_costs('ImageNet16-120')
@@ -73,8 +78,8 @@ def main(api):
         image16_params = image16_cost_metrics['params']
         image16_latency = image16_cost_metrics['latency']
         # print(image16_flops, image16_params, image16_latency)
-        arch_dict['image16_flops'] = image16_flops
-        arch_dict['image16_params'] = image16_params
+        # arch_dict['image16_flops'] = image16_flops
+        # arch_dict['image16_params'] = image16_params
         arch_dict['image16_latency'] = image16_latency
 
         for network_type in ['cifar10-valid', 'cifar100', 'ImageNet16-120']:
@@ -87,8 +92,11 @@ def main(api):
         arch_dict['arch_str'] = arch_str
 
         dataset[index] = arch_dict
+        if index == 5:
+            break
+        print('***************************No. {} arch***************************'.format(index))
 
-    assert len(dataset) == len(api), 'Wrong length of dataset'
+    # assert len(dataset) == len(api), 'Wrong length of dataset'
     
     return dataset
 
@@ -142,6 +150,7 @@ def calculate_cell_opt_flops_params(api, index=0, network_type='cifar10-valid'):
         opt_params['cells{}'.format(cell_idx)] = cell_opt_params
     
     return int(total_flops), total_params, opt_flops, opt_params
+
 
 if __name__ == '__main__':
 
