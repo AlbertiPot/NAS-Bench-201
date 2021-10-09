@@ -20,7 +20,7 @@ NODE_TYPE_DICT = {
 
 def main(api):
     
-    dataset = {}
+    dataset = []
     
     for index, arch_str in enumerate(api):
         arch_dict = {}
@@ -91,12 +91,13 @@ def main(api):
         
         arch_dict['arch_str'] = arch_str
 
-        dataset[index] = arch_dict
-        if index == 5:
-            break
+        arch = {}
+        arch[index] = arch_dict
+
+        dataset.append(arch)
         print('***************************No. {} arch***************************'.format(index))
 
-    # assert len(dataset) == len(api), 'Wrong length of dataset'
+    assert len(dataset) == len(api), 'Wrong length of dataset'
     
     return dataset
 
