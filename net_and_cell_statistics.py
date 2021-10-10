@@ -50,8 +50,8 @@ def main(api):
         imagenat16_test_acc = imagenat16_dict['test-accuracy']
         # print(imagenat16_val_acc)
         # print(imagenat16_test_acc)
-        arch_dict['imagenat16_val_acc'] = imagenat16_val_acc
-        arch_dict['imagenat16_test_acc'] = imagenat16_test_acc
+        arch_dict['imagenet16_val_acc'] = imagenat16_val_acc
+        arch_dict['imagenet16_test_acc'] = imagenat16_test_acc
 
         info = api.query_meta_info_by_index(index, '200')
 
@@ -80,7 +80,7 @@ def main(api):
         # print(image16_flops, image16_params, image16_latency)
         # arch_dict['image16_flops'] = image16_flops
         # arch_dict['image16_params'] = image16_params
-        arch_dict['image16_latency'] = image16_latency
+        arch_dict['imagenet16_latency'] = image16_latency
 
         for network_type in ['cifar10-valid', 'cifar100', 'ImageNet16-120']:
             total_flops, total_params, opt_flops, opt_params = calculate_cell_opt_flops_params(api, index, network_type)
