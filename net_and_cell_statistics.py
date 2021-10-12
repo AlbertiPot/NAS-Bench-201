@@ -6,7 +6,6 @@ import torch
 from nas_201_api import NASBench201API as API
 from xautodl.models import get_cell_based_tiny_net
 from fvcore.nn import FlopCountAnalysis, parameter_count
-
 from matrix_transform import build_matrix
 
 
@@ -20,7 +19,7 @@ NODE_TYPE_DICT = {
 
 def main(api):
     
-    dataset = []
+    dataset = {}
     
     for index, arch_str in enumerate(api):
         arch_dict = {}
@@ -91,10 +90,8 @@ def main(api):
         
         arch_dict['arch_str'] = arch_str
 
-        arch = {}
-        arch[index] = arch_dict
+        dataset[index] = arch_dict
 
-        dataset.append(arch)
         print('***************************No. {} arch***************************'.format(index))
 
     assert len(dataset) == len(api), 'Wrong length of dataset'
@@ -161,6 +158,7 @@ if __name__ == '__main__':
     
     save_path = './data'
     file_name = 'nasbench201_with_edge_flops_and_params.json'
+    # file_name = 'target.json'
     save_file = os.path.join(save_path, file_name)
     if os.path.exists(save_file):
         os.remove(save_file)
